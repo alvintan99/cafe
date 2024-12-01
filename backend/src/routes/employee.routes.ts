@@ -12,21 +12,21 @@ router.get('/', employeeController.getEmployees);
 // GET /employees/:id
 router.get('/:id', employeeController.getEmployeeById);
 
-// POST /employees
+// POST /employee
 router.post(
     '/',
     validate(CreateEmployeeDto),
     employeeController.createEmployee
 );
 
-// PUT /employees/:id
+// PUT /employee/:id
 router.put(
     '/:id',
     validate(UpdateEmployeeDto),
     employeeController.updateEmployee
 );
 
-// DELETE /employees/:id
+// DELETE /employee/:id
 router.delete('/:id', employeeController.deleteEmployee);
 
 export default router;

@@ -14,7 +14,7 @@ export const AppDataSource = new DataSource({
     password: process.env.DB_PASSWORD || 'postgres',
     database: process.env.DB_NAME || 'cafe_db',
     synchronize: false,
-    logging: ["error", "warn"],
+    logging: ['error', 'warn'],
     entities: [Cafe, Employee],
     migrations: [path.join(__dirname, '..', 'migrations', '*.{ts,js}')],
     subscribers: [],
@@ -22,8 +22,8 @@ export const AppDataSource = new DataSource({
 
 AppDataSource.initialize()
     .then(() => {
-        console.log("Data Source has been initialized!");
+        console.log('Data Source has been initialized!');
     })
     .catch((err) => {
-        console.error("Error during Data Source initialization:", err);
+        console.error('Error during Data Source initialization:', err);
     });

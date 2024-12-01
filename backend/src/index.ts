@@ -17,16 +17,14 @@ app.use(cors());
 app.use(express.json());
 app.use('/uploads', express.static(path.join(__dirname, '..', 'uploads')));
 
-// Routes
-app.use('/api/cafes', cafeRoutes);
-app.use('/api/employees', employeeRoutes);
+app.use(['/api/cafes', '/api/cafe'], cafeRoutes);
+app.use(['/api/employees', '/api/employee'], employeeRoutes);
 
 // Error handling
 app.use(errorHandler);
 
 const PORT = process.env.PORT || 3000;
 
-// Database connection and server startup
 AppDataSource.initialize()
     .then(() => {
         app.listen(PORT, () => {

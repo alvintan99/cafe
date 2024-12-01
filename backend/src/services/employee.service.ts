@@ -61,14 +61,17 @@ export class EmployeeService {
 
         const results = await query.getRawMany();
 
-        return results.map(result => new EmployeeResponseDto({
-            id: result.id,
-            name: result.name,
-            email_address: result.email_address,
-            phone_number: result.phone_number,
-            days_worked: result.days_worked,
-            cafe: result.cafe || ''
-        }));
+        return results.map(
+            (result) =>
+                new EmployeeResponseDto({
+                    id: result.id,
+                    name: result.name,
+                    email_address: result.email_address,
+                    phone_number: result.phone_number,
+                    days_worked: result.days_worked,
+                    cafe: result.cafe || '',
+                })
+        );
     }
 
     async findById(id: string): Promise<Employee | null> {

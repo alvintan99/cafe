@@ -1,3 +1,8 @@
+DO $$ 
+BEGIN 
+    RAISE NOTICE 'Starting schema creation...';
+END $$;
+
 -- Create extensions
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
@@ -34,10 +39,47 @@ CREATE TABLE IF NOT EXISTS employees (
     updated_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
 );
 
+-- Delete duplicate employee assignments
+DELETE FROM employees 
+WHERE id IN (
+    SELECT id 
+    FROM employees 
+    WHERE cafe_id IS NOT NULL 
+    GROUP BY id 
+    HAVING COUNT(cafe_id) > 1
+);
+
+-- Add a unique constraint to ensure one cafe per employee
+ALTER TABLE employees 
+ADD CONSTRAINT unique_employee_cafe 
+UNIQUE (id, cafe_id);
+
 -- Create indexes
 CREATE INDEX IF NOT EXISTS idx_cafes_location ON cafes(location);
 CREATE INDEX IF NOT EXISTS idx_employees_cafe_id ON employees(cafe_id);
 CREATE INDEX IF NOT EXISTS idx_employees_email ON employees(email_address);
+
+DO $$ 
+BEGIN 
+    RAISE NOTICE 'Creating trigger function...';
+END $$;
+
+-- Add a check constraint to ensure only one non-null cafe_id per employee
+CREATE OR REPLACE FUNCTION check_single_cafe() 
+RETURNS trigger AS $$
+BEGIN
+    IF NEW.cafe_id IS NOT NULL AND EXISTS (
+        SELECT 1 
+        FROM employees 
+        WHERE id = NEW.id 
+        AND cafe_id IS NOT NULL 
+        AND cafe_id != NEW.cafe_id
+    ) THEN
+        RAISE EXCEPTION 'Employee cannot work in multiple cafes simultaneously';
+    END IF;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
 
 -- Create updated_at trigger function
 CREATE OR REPLACE FUNCTION update_updated_at_column()
@@ -49,6 +91,17 @@ END;
 $$ language 'plpgsql';
 
 -- Create triggers
+DO $$ 
+BEGIN
+    DROP TRIGGER IF EXISTS enforce_single_cafe ON employees;
+    CREATE TRIGGER enforce_single_cafe
+        BEFORE INSERT OR UPDATE ON employees
+        FOR EACH ROW
+        EXECUTE FUNCTION check_single_cafe();
+EXCEPTION WHEN others THEN
+    RAISE NOTICE 'Error creating trigger: %', SQLERRM;
+END $$;
+
 DROP TRIGGER IF EXISTS update_cafes_updated_at ON cafes;
 CREATE TRIGGER update_cafes_updated_at
     BEFORE UPDATE ON cafes
@@ -60,3 +113,8 @@ CREATE TRIGGER update_employees_updated_at
     BEFORE UPDATE ON employees
     FOR EACH ROW
     EXECUTE FUNCTION update_updated_at_column();
+
+DO $$ 
+BEGIN 
+    RAISE NOTICE 'Schema creation completed.';
+END $$;

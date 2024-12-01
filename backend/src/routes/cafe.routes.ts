@@ -13,7 +13,7 @@ router.get('/', cafeController.getCafes);
 // GET /cafes/:id
 router.get('/:id', cafeController.getCafeById);
 
-// POST /cafes
+// POST /cafe
 router.post(
     '/',
     upload.single('logo'),
@@ -21,7 +21,7 @@ router.post(
     cafeController.createCafe
 );
 
-// PUT /cafes/:id
+// PUT /cafe/:id
 router.put(
     '/:id',
     upload.single('logo'),
@@ -29,7 +29,7 @@ router.put(
     cafeController.updateCafe
 );
 
-// DELETE /cafes/:id
+// DELETE /cafe/:id
 router.delete('/:id', cafeController.deleteCafe);
 
 export default router;
